@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#07152e">
+<title>STRADDLE HERO: THE RUNNING QUEST</title>
+<style>
+:root{--cyan:#35e6ff;--gold:#ffd45a;--pink:#ff5cb8;--ink:#07152e}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#061126;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{overflow-x:hidden}.shell{width:min(100%,1100px);margin:auto;padding:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 12px}
+.brand{font-weight:1000;letter-spacing:.06em;font-size:clamp(17px,3vw,27px);color:var(--cyan);text-shadow:0 0 18px #35e6ff77}
+.pill{border:1px solid #35e6ff66;border-radius:99px;padding:7px 12px;color:#bcefff;font-size:12px}
+.panel{background:linear-gradient(145deg,#102b50ee,#091a35f2);border:1px solid #35e6ff55;border-radius:22px;box-shadow:0 18px 60px #0008,inset 0 0 30px #35e6ff0b}
+.intro{padding:clamp(18px,4vw,34px);text-align:center}
+h1{font-size:clamp(28px,6vw,54px);line-height:1.02;margin:10px 0;color:#fff;text-shadow:0 0 24px #35e6ff88}
+.sub{color:#c4d9f2;max-width:650px;margin:10px auto 20px;line-height:1.55}
+.hero-mark{font-size:64px;filter:drop-shadow(0 0 16px #35e6ff)}
+.fields{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:18px auto;max-width:600px}
+input{background:#06152c;color:white;border:1px solid #3e719e;border-radius:12px;padding:13px 14px;font-size:16px;min-width: min(100%,220px);outline:none}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #35e6ff22}
+button{border:0;border-radius:13px;padding:13px 18px;font-size:15px;font-weight:800;cursor:pointer;color:#06152c;background:linear-gradient(135deg,#6df2ff,#35bfff);box-shadow:0 7px 22px #18c9ff33;touch-action:manipulation}
+button:active{transform:translateY(1px) scale(.99)}button.secondary{background:#17395d;color:#d8f6ff;border:1px solid #4b8bb5;box-shadow:none}button.gold{background:linear-gradient(135deg,#fff0a6,#ffbd35)}
+.note{font-size:12px;color:#9eb9d5;line-height:1.5}
+#gameArea{display:none}
+.hud{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.hud span{background:#102c4e;border:1px solid #34749a;border-radius:12px;padding:8px 12px;font-size:13px;font-weight:800}
+.stage{position:relative;overflow:hidden;border-radius:20px;border:1px solid #43dfff77;background:#06132b;min-height:350px}
+canvas{display:block;width:100%;height:min(58vh,540px);min-height:350px;touch-action:pan-y}
+#hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#d8f5ff;font-size:12px;text-shadow:0 2px 6px #000;pointer-events:none}
+.overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:14px;background:#041027d9;backdrop-filter:blur(8px);z-index:4}
+.overlay.show{display:flex}
+.dialog{width:min(100%,570px);padding:clamp(17px,4vw,26px);text-align:center;max-height:94%;overflow:auto}
+.kicker{font-size:12px;color:var(--cyan);font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.question{font-size:clamp(18px,3.3vw,25px);line-height:1.3;margin:12px 0 18px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{min-height:78px;display:flex;align-items:center;justify-content:center;line-height:1.3;padding:14px;background:linear-gradient(145deg,#173d68,#102846);border:1px solid #55b8e8;color:white}
+.answer b{display:block;color:var(--gold);font-size:18px;margin-bottom:5px}
+.feedback{font-size:18px;font-weight:900;margin:10px 0;color:var(--gold)}
+#result{display:none;padding:clamp(18px,4vw,32px);text-align:center;margin-top:12px}
+#result h2{font-size:clamp(30px,6vw,48px);margin:8px;color:var(--gold);text-shadow:0 0 20px #ffcb4488}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0}
+.stat{padding:12px 18px;background:#0a2141;border:1px solid #3978a5;border-radius:14px;min-width:110px}
+.stat strong{display:block;font-size:26px;color:var(--cyan)}
+.badge{display:inline-block;padding:10px 18px;border-radius:99px;font-weight:1000;color:#08162d;background:linear-gradient(135deg,#ffeaa0,#ffb52e);margin:8px}
+.record-wrap{margin-top:18px;text-align:left;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+th,td{padding:10px;border-bottom:1px solid #285078;text-align:left}th{color:var(--cyan)}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.hidden{display:none!important}
+@media(max-width:540px){.shell{padding:9px}.answers{grid-template-columns:1fr}.answer{min-height:62px}.stage,canvas{min-height:390px} .top{align-items:flex-start;flex-direction:column;gap:6px}}
+</style>
+</head>
+<body>
+<div class="shell">
+ <div class="top"><div class="brand">⚡ STRADDLE HERO</div><div class="pill">THE RUNNING QUEST · MISI GULING DEPAN</div></div>
+ <section id="welcome" class="panel intro">
+  <div class="hero-mark">🦸‍♀️ 🦸‍♂️</div>
+  <div class="kicker">Misi bermula sekarang</div>
+  <h1>THE RUNNING<br>QUEST!</h1>
+  <p class="sub">Berlari, kutip coin dan lepasi lima halangan ilmu. Pilih laluan yang betul untuk mengumpul bintang dan membuktikan kehebatan anda!</p>
+  <div class="fields"><input id="playerName" maxlength="40" placeholder="Nama pemain" autocomplete="name"><input id="playerClass" maxlength="30" placeholder="Kelas"></div>
+  <button id="startBtn" class="gold">MULA BERMAIN ▶</button>
+  <p class="note">Laptop: gunakan ← dan →. Smartphone: swipe kiri/kanan atau sentuh lorong pilihan.<br>Tiada had masa untuk menjawab soalan.</p>
+ </section>
+
+ <section id="gameArea">
+  <div class="hud"><span>🪙 COIN: <b id="coins">0</b></span><span>⭐ BINTANG: <b id="stars">0</b>/5</span><span>🚧 MISI: <b id="progress">0</b>/5</span></div>
+  <div class="stage">
+   <canvas id="game" aria-label="Permainan larian tiga lorong"></canvas>
+   <div id="hint">SWIPE / TEKAN ← → UNTUK BERGERAK</div>
+   <div id="questionOverlay" class="overlay">
+    <div class="panel dialog">
+     <div class="kicker" id="qObstacle">HALANGAN 1</div>
+     <div class="question" id="qText"></div>
+     <div class="answers">
+      <button class="answer" id="answerA"><span><b>A</b><span id="textA"></span></span></button>
+      <button class="answer" id="answerB"><span><b>B</b><span id="textB"></span></span></button>
+     </div>
+     <div id="feedback" class="feedback"></div>
+     <button id="continueBtn" class="gold hidden">TERUSKAN LARIAN ▶</button>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section id="result" class="panel">
+  <div class="hero-mark">🏆</div><div class="kicker">Misi selesai</div>
+  <h2>TAHNIAH HERO!</h2>
+  <p id="resultName" class="sub"></p>
+  <div class="stats">
+   <div class="stat"><strong id="finalStars">0/5</strong>Bintang</div>
+   <div class="stat"><strong id="finalCoins">0</strong>Coin</div>
+   <div class="stat"><strong id="finalScore">0</strong>Skor</div>
+  </div>
+  <div id="heroBadge" class="badge">BADGE HERO BERANI</div>
+  <p id="badgeMessage" class="sub"></p>
+  <p id="sheetsStatus" class="note" role="status">Rekod permainan disimpan.</p>
+  <div class="record-wrap">
+   <h3>📋 Rekod Permainan</h3>
+   <div id="recordTable"></div>
+   <p class="note">Rekod disimpan pada browser dan peranti ini. Rekod tidak disegerakkan secara automatik antara peranti.</p>
+  </div>
+  <div class="actions">
+   <button id="playAgain" class="gold">MAIN SEMULA ↻</button>
+   <button id="backBtn" class="secondary">KEMBALI KE WEBSITE ↗</button>
+  </div>
+ </section>
+</div>
+<script>
+(()=>{
+'use strict';
+// ===== TETAPAN GURU: isi dua URL ini sebelum edarkan permainan =====
+const SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxNnfILVVQKQiv2GVu6YbYOy7vTCeJ2dGfOrStBBygGS90gZfO4Y7lZYOpmTz5K9k4p/exec';
+const RETURN_TO_WEBSITE_URL = 'https://kuiz-pendidikan-muzik-tahun-5.my.canva.site/dahbxat8vnk';
+const questions=[
+ {obstacle:'1. GERBANG PERMULAAN',q:'Bagaimanakah kedudukan kaki sebelum melakukan guling depan posisi straddle?',a:'Kaki dirapatkan',b:'Kaki dibuka',correct:'B'},
+ {obstacle:'2. JAMBATAN TANGAN',q:'Apakah yang perlu diletakkan pada tilam terlebih dahulu?',a:'Kedua-dua tapak tangan',b:'Sebelah tangan sahaja',correct:'A'},
+ {obstacle:'3. TEROWONG KESELAMATAN',q:'Apakah kedudukan dagu yang betul semasa mengguling?',a:'Dagu dirapatkan ke dada',b:'Kepala didongakkan',correct:'A'},
+ {obstacle:'4. LALUAN BERGOLEK',q:'Bahagian manakah yang menyentuh tilam ketika mula mengguling?',a:'Bahagian atas kepala',b:'Belakang bahu',correct:'B'},
+ {obstacle:'5. GARISAN PENAMAT',q:'Bagaimanakah kedudukan kaki selepas selesai guling depan posisi straddle?',a:'Kaki dibuka dan badan seimbang',b:'Kaki disilangkan',correct:'A'}
+];
+const $=id=>document.getElementById(id);
+const canvas=$('game'),ctx=canvas.getContext('2d');
+let running=false,paused=false,lane=1,coins=0,stars=0,asked=0,player='',klass='',last=0,elapsed=0,coinItems=[],particles=[],audioCtx=null,musicTimer=null,endingPlayed=false;
+let width=900,height=520,dpr=1;
+function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);width=Math.max(320,r.width);height=Math.max(350,r.height);canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener('resize',resize);
+function audioStart(){
+ try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();
+  if(musicTimer)clearInterval(musicTimer);
+  // Muzik latar elektronik ringkas yang dijana secara lokal.
+  const notes=[220,261.63,329.63,293.66,246.94,293.66,369.99,329.63];let n=0;
+  musicTimer=setInterval(()=>{if(!audioCtx||audioCtx.state!=='running')return;const t=audioCtx.currentTime;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=notes[n++%notes.length];g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.025,t+.04);g.gain.exponentialRampToValueAtTime(.0001,t+.32);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+.34)},390);
+ }catch(e){}
+}
+function endingSound(){if(endingPlayed)return;endingPlayed=true;try{const c=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx=c;c.resume();[523.25,659.25,783.99,1046.5].forEach((f,i)=>{let t=c.currentTime+i*.17,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.42);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.44)})}catch(e){}}
+function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
+function startGame(){
+ player=$('playerName').value.trim();klass=$('playerClass').value.trim();
+ if(!player||!klass){alert('Sila masukkan nama dan kelas sebelum bermain.');return}
+ coins=0;stars=0;asked=0;elapsed=0;lane=1;running=true;paused=false;endingPlayed=false;coinItems=[];particles=[];
+ $('welcome').style.display='none';$('result').style.display='none';$('gameArea').style.display='block';$('questionOverlay').classList.remove('show');
+ resize();updateHud();audioStart();last=performance.now();requestAnimationFrame(loop);
+}
+function updateHud(){$('coins').textContent=coins;$('stars').textContent=stars;$('progress').textContent=asked}
+function draw(){
+ ctx.clearRect(0,0,width,height);
+ const sky=ctx.createLinearGradient(0,0,0,height);sky.addColorStop(0,'#06132e');sky.addColorStop(.65,'#123c68');sky.addColorStop(1,'#061329');ctx.fillStyle=sky;ctx.fillRect(0,0,width,height);
+ // horizon glow and futuristic city
+ ctx.fillStyle='#0b2947';for(let i=0;i<18;i++){let x=i*width/17;let h=35+(i*37%95);ctx.fillRect(x,height*.42-h,Math.max(8,width/35),h)}
+ ctx.strokeStyle='#24dfff44';ctx.lineWidth=2;for(let i=0;i<12;i++){ctx.beginPath();ctx.moveTo(width/2,height*.42);ctx.lineTo(i*width/11,height);ctx.stroke()}
+ // road trapezoid
+ ctx.fillStyle='#0a1c35';ctx.beginPath();ctx.moveTo(width*.42,height*.4);ctx.lineTo(width*.58,height*.4);ctx.lineTo(width*.98,height);ctx.lineTo(width*.02,height);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#3eeaff99';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(width*.42,height*.4);ctx.lineTo(width*.02,height);ctx.moveTo(width*.58,height*.4);ctx.lineTo(width*.98,height);ctx.stroke();
+ for(let j=1;j<=2;j++){ctx.strokeStyle='#60dfff66';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(width/2+(j-1.5)*width*.045,height*.4);ctx.lineTo(width/2+(j-1.5)*width*.48,height);ctx.stroke()}
+ // perspective floor marks
+ for(let i=0;i<9;i++){let p=((i/9+elapsed*.00045)%1);let y=height*.43+p*p*height*.57;ctx.strokeStyle='#43cfff55';ctx.lineWidth=1+p*2;ctx.beginPath();ctx.moveTo(width*.5-width*.47*p,y);ctx.lineTo(width*.5+width*.47*p,y);ctx.stroke()}
+ // coins in lanes
+ const center=width/2, spread=width*.23;
+ for(const c of coinItems){let p=c.z;let y=height*.42+p*p*height*.55;let x=center+(c.lane-1)*spread*p;let r=4+p*9;ctx.fillStyle='#ffdc62';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff2a6';ctx.lineWidth=2;ctx.stroke()}
+ // hero
+ const hx=center+(lane-1)*spread*.92,hy=height*.78,scale=Math.max(.7,Math.min(1.25,width/650));
+ ctx.save();ctx.translate(hx,hy);ctx.scale(scale,scale);
+ ctx.shadowColor='#31dfff';ctx.shadowBlur=22;
+ ctx.fillStyle='#ffca45';ctx.fillRect(-16,-8,13,28);ctx.fillRect(4,-8,13,28);
+ ctx.fillStyle='#20cfff';ctx.fillRect(-19,-38,38,34);
+ ctx.fillStyle='#e9faff';ctx.beginPath();ctx.arc(0,-52,16,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#ff5eae';ctx.fillRect(-17,-65,34,8);
+ ctx.fillStyle='#09213b';ctx.fillRect(-9,-55,5,4);ctx.fillRect(5,-55,5,4);
+ ctx.fillStyle='#ffca45';ctx.fillRect(-27,-35,9,27);ctx.fillRect(18,-35,9,27);
+ ctx.restore();
+ // mission gate ahead
+ if(asked<5){let z=.12+(asked%1)*.02,y=height*.42+z*z*height*.55,x=width/2;ctx.strokeStyle='#ff58bd';ctx.lineWidth=5;ctx.shadowColor='#ff58bd';ctx.shadowBlur=16;ctx.strokeRect(x-width*.10,y-32,width*.20,42);ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('HALANGAN '+(asked+1),x,y-42)}
+ ctx.restore?.();
+}
+function loop(now){if(!running)return;const dt=Math.min(40,now-last);last=now;if(!paused){elapsed+=dt;
+ if(Math.random()<.025&&asked<5)coinItems.push({lane:Math.floor(Math.random()*3),z:0});
+ for(const c of coinItems)c.z+=dt*.00042;
+ coinItems=coinItems.filter(c=>{if(c.z>.86&&c.lane===lane){coins++;return false}return c.z<1.08});
+ if(asked<5&&elapsed>(asked+1)*5200){triggerQuestion()}
+ draw();}requestAnimationFrame(loop)}
+function triggerQuestion(){paused=true;const q=questions[asked];$('qObstacle').textContent=q.obstacle;$('qText').textContent=q.q;$('textA').textContent=q.a;$('textB').textContent=q.b;$('feedback').textContent='';$('continueBtn').classList.add('hidden');$('answerA').disabled=false;$('answerB').disabled=false;$('questionOverlay').classList.add('show')}
+function answer(choice){
+ if(!paused||$('continueBtn').classList.contains('hidden')===false)return;
+ const q=questions[asked],correct=choice===q.correct;
+ if(correct){stars++;$('feedback').textContent='⭐ BETUL! Anda mendapat satu bintang!';$('feedback').style.color='#ffe16b'}
+ else{$('feedback').textContent=['Jangan putus asa, Hero! Teruskan mencuba! 💪','Setiap kesilapan ialah peluang untuk belajar! 🌟','Anda masih hebat! Teruskan misi! 🚀'][asked%3];$('feedback').style.color='#8deaff'}
+ if(correct){$('feedback').textContent='⭐ BETUL! Anda mendapat satu bintang!'}
+ $('answerA').disabled=true;$('answerB').disabled=true;asked++;updateHud();$('continueBtn').classList.remove('hidden');
+}
+function continueRun(){$('questionOverlay').classList.remove('show');paused=false;if(asked>=5){setTimeout(finish,900)}}
+function badgeFor(s){if(s<=2)return ['BADGE HERO BERANI','Anda berani mencuba dan berjaya menamatkan misi!'];if(s===3)return ['BADGE HERO HEBAT','Hebat! Pengetahuan dan usaha anda semakin mantap!'];return ['BADGE HERO LEGEND','Luar biasa! Anda menguasai misi seperti seorang legenda!']}
+function getRecords(){try{return JSON.parse(localStorage.getItem('straddleHeroRecords')||'[]')}catch(e){return []}}
+function saveRecord(rec){const a=getRecords();a.unshift(rec);try{localStorage.setItem('straddleHeroRecords',JSON.stringify(a.slice(0,100)))}catch(e){}}
+async function sendRecordToSheets(rec){
+ if(!SHEETS_WEB_APP_URL || SHEETS_WEB_APP_URL.includes('PASTE_URL_')){
+  return {ok:false,message:'Google Sheets belum disambungkan. Rekod hanya disimpan pada peranti ini.'};
+ }
+ try{
+  // text/plain mengelakkan preflight CORS; no-cors bermaksud browser tidak boleh membaca respons server.
+  await fetch(SHEETS_WEB_APP_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec),keepalive:true});
+  return {ok:true,message:'Rekod telah dihantar ke Google Sheets.'};
+ }catch(err){
+  return {ok:false,message:'Penghantaran ke Google Sheets gagal. Rekod masih disimpan pada peranti ini.'};
+ }
+}
+function renderRecords(){const a=getRecords();if(!a.length){$('recordTable').innerHTML='<p class="note">Belum ada rekod permainan.</p>';return}
+ const rows=a.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.time)}</td><td>${esc(r.name)}</td><td>${esc(r.klass)}</td><td>${r.score}</td><td>${esc(r.badge)}</td></tr>`).join('');
+ $('recordTable').innerHTML=`<table><thead><tr><th>Tarikh</th><th>Masa</th><th>Nama</th><th>Kelas</th><th>Skor</th><th>Badge</th></tr></thead><tbody>${rows}</tbody></table>`}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function finish(){running=false;paused=false;stopMusic();const now=new Date(),[badge,msg]=badgeFor(stars),score=stars*100+coins*10;
+ const rec={date:now.toLocaleDateString('ms-MY'),time:now.toLocaleTimeString('ms-MY'),timestamp:now.toISOString(),name:player,klass,stars,coins,score,badge};
+ saveRecord(rec);$('gameArea').style.display='none';$('result').style.display='block';$('resultName').textContent='Syabas, '+player+' dari kelas '+klass+'!';$('finalStars').textContent=stars+'/5';$('finalCoins').textContent=coins;$('finalScore').textContent=score;$('heroBadge').textContent=badge;$('badgeMessage').textContent=msg;
+ $('sheetsStatus').textContent='Sedang menghantar rekod ke Google Sheets…';renderRecords();endingSound();
+ const sent=await sendRecordToSheets(rec);$('sheetsStatus').textContent=sent.message;
+}
+function move(d){if(!running||paused)return;lane=Math.max(0,Math.min(2,lane+d))}
+let startX=null,startY=null;
+canvas.addEventListener('touchstart',e=>{const t=e.changedTouches[0];startX=t.clientX;startY=t.clientY},{passive:true});
+canvas.addEventListener('touchend',e=>{if(startX===null)return;const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;if(Math.abs(dx)>25)move(dx>0?1:-1);else if(Math.abs(dy)<25){const rect=canvas.getBoundingClientRect(),x=t.clientX-rect.left;lane=x<rect.width/3?0:x>rect.width*2/3?2:1}startX=null;startY=null},{passive:true});
+canvas.addEventListener('click',e=>{if(paused)return;const r=canvas.getBoundingClientRect(),x=e.clientX-r.left;lane=x<r.width/3?0:x>r.width*2/3?2:1});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'){e.preventDefault();move(1)}});
+$('startBtn').addEventListener('click',startGame);$('answerA').addEventListener('click',()=>answer('A'));$('answerB').addEventListener('click',()=>answer('B'));$('continueBtn').addEventListener('click',continueRun);
+$('playAgain').addEventListener('click',()=>{$('result').style.display='none';$('welcome').style.display='block';$('playerName').value=player;$('playerClass').value=klass});
+$('backBtn').addEventListener('click',()=>{stopMusic();if(RETURN_TO_WEBSITE_URL && !RETURN_TO_WEBSITE_URL.includes('PASTE_URL_')){try{window.top.location.assign(RETURN_TO_WEBSITE_URL)}catch(e){location.href=RETURN_TO_WEBSITE_URL}return}const ref=document.referrer;if(ref){try{if(new URL(ref).origin!==location.origin){location.href=ref;return}}catch(e){}}if(history.length>1){history.back();return}alert('Pautan website belum ditetapkan. Isi RETURN_TO_WEBSITE_URL dalam bahagian tetapan guru.');});
+resize();
+})();
+</script>
+</body>
+</html>
